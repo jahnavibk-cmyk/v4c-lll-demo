@@ -1,0 +1,43 @@
+bundle:
+  name: v4c-lll-demo
+
+variables:
+  catalog:
+    default: main
+  schema:
+    default: lll_demo
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-47438d1b-6486.cloud.databricks.com
+
+  prod:
+    workspace:
+      host: https://dbc-47438d1b-6486.cloud.databricks.com
+
+resources:
+  jobs:
+    bronze_ingest_job:
+      name: Bronze Ingest Pipeline
+
+      environments:
+        - environment_key: serverless
+          spec:
+            client: "1"
+
+      tasks:
+        - task_key: ingest
+          notebook_task:
+            notebook_path: ./src/pipelines/bronze_ingest.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          environment_key: serverless
+
+      schedule:
+        quartz_cron_expression: "0 0 8 * * ?"
+        timezone_id: "Asia/Kolkata"
+        pause_status: PAUSED
